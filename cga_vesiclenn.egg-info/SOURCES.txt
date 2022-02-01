@@ -1,0 +1,8 @@
+README.md
+setup.py
+cga_vesiclenn.egg-info/PKG-INFO
+cga_vesiclenn.egg-info/SOURCES.txt
+cga_vesiclenn.egg-info/dependency_links.txt
+cga_vesiclenn.egg-info/entry_points.txt
+cga_vesiclenn.egg-info/requires.txt
+cga_vesiclenn.egg-info/top_level.txt

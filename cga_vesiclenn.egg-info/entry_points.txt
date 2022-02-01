@@ -1,0 +1,3 @@
+[crease_ga.plugins]
+vesiclenn = cga_vesiclenn.scatterer_generator:scatterer_generator
+
