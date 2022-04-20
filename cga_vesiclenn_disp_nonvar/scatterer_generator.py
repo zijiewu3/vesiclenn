@@ -14,29 +14,49 @@ class scatterer_generator:
     ------------------------------------------
     *TODO*
     '''
-    def __init__(self,shape_params = [NNMODEL_DIR_PATH+'/1.h5'],
-                 minvalu = (50,0,0,0,0,0,0,6),
-                 maxvalu = (2000,1,1,1,1,1,1,7)):
+    def __init__(self,shape_params = [NNMODEL_DIR_PATH+'/1.h5',0.6,25],
+                 minvalu = (20, 0.1, 0.01, 0.01, 0.5,0.05, 1),#Rtotal fcore fAin fAout sAin pd
+                 maxvalu = (3000,0.95,0.99,0.99,0.1,0.5,6)):
         self.minvalu = minvalu
         self.maxvalu = maxvalu
-        self.numvars = 8
+        self.numvars = 7
         self.model_path = shape_params[0]
+        self.sB = shape_params[1]
+        self.dp = shape_params[2]
 
     def load_model(self):
         self.model = tf.keras.models.load_model(self.model_path)
-        self.nn_minvalu = np.array([0,0,0,0,0,0,-2])
-        self.nn_maxvalu = np.array([1,1,1,1,1,1,2])
+        self.nn_minvalu = np.array([0,0,0,0.5,0.5,np.log(0.5)])
+        self.nn_maxvalu = np.array([1,1,1,1,0.75,np.log(10)])
 
     def converttoIQ(self,qrange,param):
         self.load_model()
         param = np.array(param)
-        R = param[0]
-        nn_input = np.zeros((len(qrange),7))
-        nn_input[:,6] = (np.log10(qrange*R)-self.nn_minvalu[-1])/(self.nn_maxvalu[-1]-self.nn_minvalu[-1])
-        nn_input[:,:6] = (param[1:7]-self.nn_minvalu[:6])/(self.nn_maxvalu[:6]-self.nn_minvalu[:6])
-        nn_output = np.array([10**i for i in self.model(nn_input).numpy()]).flatten()
-        nn_output = nn_output + 10**(-param[-1])
-        return nn_output/nn_output[0]
+        R_total_mu = param[0]
+        R_core_mu = R_total_mu*param[1]
+        tAin = (R_total_mu-R_core_mu)*param[2]
+        tAout = (R_total_mu-R_core_mu-tAin)*param[3]
+        tB = R_total_mu-R_core_mu-tAin-tAout
+         
+        R_core_sd = R_total_mu*param[-2]
+        nn_output_sum = np.zeros(len(qrange))
+        for Rcore in np.linspace(R_core_mu-1.5*R_core_sd, R_core_mu+1.5*R_core_sd,num = 20):
+            if Rcore < 5:
+                continue
+            Rtotal = Rcore+tAin+tAout+tB
+            qRrange = qrange*Rtotal
+            fcore = Rcore/Rtotal
+            fAin = tAin/(Rtotal-Rcore)
+            fAout = param[3]
+            sAin = param[4]
+
+            nn_input = np.zeros((len(qrange),6))
+            input_nn = [fcore,fAin,fAout,sAin,self.sB]
+            nn_input[:,5] = (np.log10(qRrange)-self.nn_minvalu[-1])/(self.nn_maxvalu[-1]-self.nn_minvalu[-1])
+            nn_input[:,:5] = (input_nn-self.nn_minvalu[:5])/(self.nn_maxvalu[:5]-self.nn_minvalu[:5])
+            nn_output_sum += np.array([10**i for i in self.model(nn_input).numpy()]).flatten()
+        nn_output_sum += 10**(-param[-1])
+        return nn_output_sum/nn_output_sum[0]
             
 class scatterer_generator_log_normal:
     '''
