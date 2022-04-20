@@ -52,7 +52,7 @@ class scatterer_generator:
 
             nn_input = np.zeros((len(qrange),6))
             input_nn = [fcore,fAin,fAout,sAin,self.sB]
-            nn_input[:,5] = (np.log(qRrange)-self.nn_minvalu[-1])/(self.nn_maxvalu[-1]-self.nn_minvalu[-1])
+            nn_input[:,5] = (np.log10(qRrange)-self.nn_minvalu[-1])/(self.nn_maxvalu[-1]-self.nn_minvalu[-1])
             nn_input[:,:5] = (input_nn-self.nn_minvalu[:5])/(self.nn_maxvalu[:5]-self.nn_minvalu[:5])
             nn_output_sum += np.array([10**i for i in self.model(nn_input).numpy()]).flatten()
         nn_output_sum += 10**(-param[-1])
