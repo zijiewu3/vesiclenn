@@ -40,7 +40,7 @@ class scatterer_generator:
         tAout = (R_total_mu-R_core_mu-tAin)*param[3]
         tB = R_total_mu-R_core_mu-tAin-tAout
          
-        R_core_sd = R_total_mu*param[-2]
+        R_core_sd = R_core_mu*param[-2]
         nn_output_sum = np.zeros(len(qrange))
         for Rcore in np.linspace(R_core_mu-1.5*R_core_sd, R_core_mu+1.5*R_core_sd,num = 20):
             if Rcore < 5:
@@ -57,8 +57,9 @@ class scatterer_generator:
             nn_input[:,5] = (np.log10(qRrange)-self.nn_minvalu[-1])/(self.nn_maxvalu[-1]-self.nn_minvalu[-1])
             nn_input[:,:5] = (input_nn-self.nn_minvalu[:5])/(self.nn_maxvalu[:5]-self.nn_minvalu[:5])
             nn_output_sum += np.array([10**i for i in self.model(nn_input).numpy()]).flatten()*gaussian(Rcore,R_core_mu,R_core_sd)
+        nn_output_sum /= nn_output_sum[0]
         nn_output_sum += 10**(-param[-1])
-        return nn_output_sum/nn_output_sum[0]
+        return nn_output_sum
             
 class scatterer_generator_log_normal:
     '''
