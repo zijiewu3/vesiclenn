@@ -16,7 +16,7 @@ class scatterer_generator:
     '''
     def __init__(self,shape_params = [NNMODEL_DIR_PATH+'/1.h5',0.6,25],
                  minvalu = (20, 0.1, 0.01, 0.01, 0.5,0.05, 1),#Rtotal fcore fAin fAout sAin pd
-                 maxvalu = (3000,0.95,0.99,0.99,0.1,0.5,6)):
+                 maxvalu = (3000,0.95,0.99,0.99,1,0.5,6)):
         self.minvalu = minvalu
         self.maxvalu = maxvalu
         self.numvars = 7
@@ -52,7 +52,7 @@ class scatterer_generator:
 
             nn_input = np.zeros((len(qrange),6))
             input_nn = [fcore,fAin,fAout,sAin,self.sB]
-            nn_input[:,5] = (np.log10(qRrange)-self.nn_minvalu[-1])/(self.nn_maxvalu[-1]-self.nn_minvalu[-1])
+            nn_input[:,5] = (np.log(qRrange)-self.nn_minvalu[-1])/(self.nn_maxvalu[-1]-self.nn_minvalu[-1])
             nn_input[:,:5] = (input_nn-self.nn_minvalu[:5])/(self.nn_maxvalu[:5]-self.nn_minvalu[:5])
             nn_output_sum += np.array([10**i for i in self.model(nn_input).numpy()]).flatten()
         nn_output_sum += 10**(-param[-1])
