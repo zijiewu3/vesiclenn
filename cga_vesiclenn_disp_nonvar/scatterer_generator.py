@@ -4,6 +4,8 @@ import sys
 from tensorflow import keras
 import tensorflow as tf
 from cga_vesiclenn import NNMODEL_DIR_PATH
+def gaussian(x,mu,sigma):
+    return 1/np.sqrt(2*np.pi*sigma**2)*np.exp(-(x-mu)**2/(2*sigma**2))
 class scatterer_generator:
     '''
     shape specific descriptors (shape_params):
@@ -52,9 +54,9 @@ class scatterer_generator:
 
             nn_input = np.zeros((len(qrange),6))
             input_nn = [fcore,fAin,fAout,sAin,self.sB]
-            nn_input[:,5] = (np.log(qRrange)-self.nn_minvalu[-1])/(self.nn_maxvalu[-1]-self.nn_minvalu[-1])
+            nn_input[:,5] = (np.log10(qRrange)-self.nn_minvalu[-1])/(self.nn_maxvalu[-1]-self.nn_minvalu[-1])
             nn_input[:,:5] = (input_nn-self.nn_minvalu[:5])/(self.nn_maxvalu[:5]-self.nn_minvalu[:5])
-            nn_output_sum += np.array([10**i for i in self.model(nn_input).numpy()]).flatten()
+            nn_output_sum += np.array([10**i for i in self.model(nn_input).numpy()]).flatten()*gaussian(Rcore,R_core_mu,R_core_sd)
         nn_output_sum += 10**(-param[-1])
         return nn_output_sum/nn_output_sum[0]
             
