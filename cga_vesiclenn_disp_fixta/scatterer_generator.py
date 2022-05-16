@@ -16,15 +16,15 @@ class scatterer_generator:
     ------------------------------------------
     *TODO*
     '''
-    def __init__(self,shape_params = [NNMODEL_DIR_PATH+'/1.h5',0.6,25],
-                 minvalu = (20, 0.1, 0.01, 0.01, 0.5,0.05, 1),#Rtotal fcore fAin fAout sAin pd
-                 maxvalu = (3000,0.95,0.99,0.99,1,0.5,6)):
+    def __init__(self,shape_params = [NNMODEL_DIR_PATH+'/1.h5',0.6,10],
+                 minvalu = (50,  0.2,1.0, 0.1, 1),#Rtotal fcore fAin fAout sAin pd
+                 maxvalu = (3000,3.0,2.0, 1.0, 5)):
         self.minvalu = minvalu
         self.maxvalu = maxvalu
-        self.numvars = 7
+        self.numvars = 5
         self.model_path = shape_params[0]
         self.sB = shape_params[1]
-        self.dp = shape_params[2]
+        self.tA = shape_params[2]
 
     def load_model(self):
         self.model = tf.keras.models.load_model(self.model_path)
@@ -35,11 +35,11 @@ class scatterer_generator:
         self.load_model()
         param = np.array(param)
         R_total_mu = param[0]
-        R_core_mu = R_total_mu*param[1]
-        tAin = (R_total_mu-R_core_mu)*param[2]
-        tAout = (R_total_mu-R_core_mu-tAin)*param[3]
-        tB = R_total_mu-R_core_mu-tAin-tAout
+        tAin = self.tA
+        tAout = self.tA
+        tB = self.tA*param[1]
          
+        R_core_mu = R_total_mu-tAin-tAout-tB
         R_core_sd = R_core_mu*param[-2]
         nn_output_sum = np.zeros(len(qrange))
         for Rcore in np.linspace(R_core_mu-1.5*R_core_sd, R_core_mu+1.5*R_core_sd,num = 20):
