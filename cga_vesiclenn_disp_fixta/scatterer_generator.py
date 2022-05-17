@@ -49,8 +49,8 @@ class scatterer_generator:
             qRrange = qrange*Rtotal
             fcore = Rcore/Rtotal
             fAin = tAin/(Rtotal-Rcore)
-            fAout = param[3]
-            sAin = param[4]
+            fAout = tAout/(tAout+tB)
+            sAin = param[2]
 
             nn_input = np.zeros((len(qrange),6))
             input_nn = [fcore,fAin,fAout,sAin,self.sB]
