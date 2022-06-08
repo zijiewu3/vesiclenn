@@ -58,7 +58,7 @@ class scatterer_generator:
             input_nn = [fcore,fAin,fAout,sAin,self.sB]
             nn_input[:,5] = (np.log10(qRrange)-self.nn_minvalu[-1])/(self.nn_maxvalu[-1]-self.nn_minvalu[-1])
             nn_input[:,:5] = (input_nn-self.nn_minvalu[:5])/(self.nn_maxvalu[:5]-self.nn_minvalu[:5])
-            nn_output_sum += np.array([10**i for i in self.model(nn_input).numpy()]).flatten()*gaussian(Rcore,R_core_mu,R_core_sd)
+            nn_output_sum += np.array([10**i for i in self.model(nn_input).numpy()]).flatten()*gaussian(Rcore,R_core_mu,R_core_sd)*(R_total**3-R_core**3)**2
         nn_output_sum /= nn_output_sum[0]
         nn_output_sum += 10**(-param[-1])
         return nn_output_sum
